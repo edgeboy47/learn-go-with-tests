@@ -3,33 +3,35 @@ package structs
 import "testing"
 
 func TestPerimeter(t *testing.T) {
-	rectangle := Rectangle{10.0, 10.0}
-	actual := rectangle.Perimeter()
-	expected := 40.0
+	perimeterTests := []struct {
+		shape    Shape
+		expected float64
+	}{
+		{Rectangle{5.0, 4.0}, 18.0},
+		{Circle{10.0}, 62.83185307179586},
+	}
 
-	if actual != expected {
-		t.Errorf("got %.2f want %.2f", actual, expected)
+	for _, shape := range perimeterTests {
+		actual := shape.shape.Perimeter()
+		if actual != shape.expected {
+			t.Errorf("got %g want %g", actual, shape.expected)
+		}
 	}
 }
 
 func TestArea(t *testing.T) {
-  checkArea := func(t testing.TB, shape Shape, want float64) {
-    t.Helper()
-    got := shape.Area()
-    if got != want {
-      t.Errorf("got %g want %g", got, want)
-    }
-  }
+	areaTests := []struct {
+		shape    Shape
+		expected float64
+	}{
+		{Rectangle{5.0, 4.0}, 20.0},
+		{Circle{10.0}, 314.1592653589793},
+	}
 
-	t.Run("Rectangle", func(t *testing.T) {
-		rectangle := Rectangle{5.0, 4.0}
-		expected := 20.0
-    checkArea(t, rectangle, expected)
-	})
-
-	t.Run("Circles", func(t *testing.T) {
-		circle := Circle{10.0}
-		expected := 314.1592653589793
-    checkArea(t, circle, expected)
-  })
+	for _, shape := range areaTests {
+		actual := shape.shape.Area()
+		if actual != shape.expected {
+			t.Errorf("got %g want %g", actual, shape.expected)
+		}
+	}
 }
