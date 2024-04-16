@@ -11,11 +11,21 @@ func assertString(t testing.TB, got, want string) {
 }
 
 func assertError(t testing.TB, got, want error) {
-  t.Helper()
+	t.Helper()
 
-  if got != want {
-    t.Errorf("got error %q want %q", got, want)
-  }
+	if got != want {
+		t.Errorf("got error %q want %q", got, want)
+	}
+}
+
+func assertValue(t testing.TB, dictionary Dictionary, word, definition string) {
+	t.Helper()
+
+	got, err := dictionary.Search(word)
+	if err != nil {
+		t.Fatal("should find added word:", err)
+	}
+	assertString(t, got, definition)
 }
 
 func TestSearch(t *testing.T) {
@@ -28,10 +38,32 @@ func TestSearch(t *testing.T) {
 		assertString(t, got, want)
 	})
 
-  t.Run("Unknown word", func(t *testing.T) {
+	t.Run("Unknown word", func(t *testing.T) {
 		_, err := dict.Search("unknown")
 		want := ErrValueNotFound
 
 		assertError(t, err, want)
-  })
+	})
+}
+
+func TestAdd(t *testing.T) {
+	dict := Dictionary{}
+
+	t.Run("New Key", func(t *testing.T) {
+		err := dict.Add("key", "value")
+		key := "key"
+		want := "value"
+
+		assertError(t, err, nil)
+		assertValue(t, dict, key, want)
+	})
+
+	t.Run("Existing Key", func(t *testing.T) {
+		err := dict.Add("key", "value2")
+		key := "key"
+		want := "value"
+
+		assertError(t, err, ErrKeyExists)
+		assertValue(t, dict, key, want)
+	})
 }
