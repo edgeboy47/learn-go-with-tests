@@ -30,3 +30,21 @@ func (dict Dictionary) Add(key, value string) error {
 		return err
 	}
 }
+
+func (dict Dictionary) Update(key, value string) error {
+	_, err := dict.Search(key)
+
+	switch err {
+	case nil:
+		dict[key] = value
+		return nil
+	case ErrValueNotFound:
+		return err
+	default:
+		return err
+	}
+}
+
+func (dict Dictionary) Delete(key string) {
+  delete(dict, key)
+}

@@ -28,6 +28,16 @@ func assertValue(t testing.TB, dictionary Dictionary, word, definition string) {
 	assertString(t, got, definition)
 }
 
+func assertDefinition(t testing.TB, dictionary Dictionary, word, definition string) {
+	t.Helper()
+
+	got, err := dictionary.Search(word)
+	if err != nil {
+		t.Fatal("should find added word:", err)
+	}
+	assertString(t, got, definition)
+}
+
 func TestSearch(t *testing.T) {
 	dict := Dictionary{"test": "test string"}
 
@@ -66,4 +76,38 @@ func TestAdd(t *testing.T) {
 		assertError(t, err, ErrKeyExists)
 		assertValue(t, dict, key, want)
 	})
+}
+
+func TestUpdate(t *testing.T) {
+	t.Run("Existing Key", func(t *testing.T) {
+		key := "test"
+		value := "test value"
+		dict := Dictionary{key: value}
+		newValue := "new value"
+
+		dict.Update(key, newValue)
+		assertDefinition(t, dict, key, newValue)
+	})
+
+	t.Run("New Key", func(t *testing.T) {
+		key := "test"
+		value := "test value"
+		dict := Dictionary{key: value}
+		newKey := "new key"
+		newValue := "new value"
+
+		err := dict.Update(newKey, newValue)
+		assertError(t, err, ErrValueNotFound)
+	})
+}
+
+func TestDelete(t *testing.T) {
+	key := "test"
+	value := "test value"
+	dict := Dictionary{key: value}
+
+  dict.Delete(key)
+  _, err := dict.Search(key)
+
+  assertError(t, err, ErrValueNotFound)
 }
