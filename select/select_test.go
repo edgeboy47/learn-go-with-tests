@@ -13,23 +13,38 @@ func makeServer(delay time.Duration) *httptest.Server {
 		w.WriteHeader(http.StatusOK)
 	}))
 
-  return server
+	return server
 }
 
 func TestRacer(t *testing.T) {
-	slowServer := makeServer(20 * time.Millisecond)
-	fastServer := makeServer(0)
-  defer slowServer.Close()
-  defer fastServer.Close()
+	t.Run("compares speeds of servers, returning the url of the fastest", func(t *testing.T) {
 
-	slowUrl := slowServer.URL
-	fastUrl := fastServer.URL
+		slowServer := makeServer(20 * time.Millisecond)
+		fastServer := makeServer(0)
+		defer slowServer.Close()
+		defer fastServer.Close()
 
-	want := fastUrl
-	got := Racer(slowUrl, fastUrl)
+		slowUrl := slowServer.URL
+		fastUrl := fastServer.URL
 
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
+		want := fastUrl
+		got, _ := Racer(slowUrl, fastUrl, 10 * time.Second)
 
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+
+	})
+
+	t.Run("returns an error if a server doesn't response within 10s", func(t *testing.T) {
+		serverA := makeServer(11 * time.Second)
+		serverB := makeServer(12 * time.Second)
+		defer serverA.Close()
+		defer serverB.Close()
+		_, err := Racer(serverA.URL, serverB.URL, 10 * time.Second)
+
+    if err == nil {
+      t.Error("expected an error but didn't get one")
+    }
+	})
 }
